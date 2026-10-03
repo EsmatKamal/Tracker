@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Tracker</title>
-    <link rel="manifest" href="/Tracker/manifest.json">
-    <meta name="theme-color" content="#667eea">
     <style>
         * {
             margin: 0;
@@ -99,11 +97,6 @@
             cursor: pointer;
             font-size: 12px;
             padding: 4px 8px;
-            transition: color 0.2s;
-        }
-        
-        .delete-btn:hover {
-            color: #c62828;
         }
         
         .add-item {
@@ -139,19 +132,6 @@
             font-weight: 600;
         }
         
-        .btn-add:hover {
-            background: #5568d3;
-        }
-        
-        .footer {
-            margin-top: 25px;
-            padding-top: 15px;
-            border-top: 1px solid #2a2a2a;
-            text-align: center;
-            color: #666;
-            font-size: 12px;
-        }
-        
         .stats {
             display: flex;
             gap: 20px;
@@ -176,6 +156,23 @@
             color: #666;
             margin-top: 4px;
         }
+        
+        .footer {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid #2a2a2a;
+            text-align: center;
+        }
+        
+        button {
+            background: #333;
+            color: #888;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
     </style>
 </head>
 <body>
@@ -199,7 +196,7 @@
         <div class="section">
             <div class="section-title">Core</div>
             <div id="coreItems"></div>
-            <div class="add-item" id="coreAdd">
+            <div class="add-item">
                 <input type="text" placeholder="Add item..." id="newItemCore" autocomplete="off">
                 <button class="btn-add" onclick="addCoreItem()">Add</button>
             </div>
@@ -208,23 +205,18 @@
         <div class="section">
             <div class="section-title">Daily Habits</div>
             <div id="habitItems"></div>
-            <div class="add-item" id="habitAdd">
+            <div class="add-item">
                 <input type="text" placeholder="Add habit..." id="newItemHabit" autocomplete="off">
                 <button class="btn-add" onclick="addHabitItem()">Add</button>
             </div>
         </div>
         
         <div class="footer">
-            <button style="background: #333; color: #888; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;" onclick="resetDay()">Reset for Tomorrow</button>
+            <button onclick="resetDay()">Reset for Tomorrow</button>
         </div>
     </div>
     
     <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/Tracker/service-worker.js')
-                .catch(err => console.log('Service Worker registration failed'));
-        }
-        
         let data = {
             date: new Date().toISOString().split('T')[0],
             coreItems: [
@@ -245,7 +237,6 @@
             const saved = localStorage.getItem('minimalTrackerData');
             if (saved) {
                 data = JSON.parse(saved);
-                // Check if new day
                 const today = new Date().toISOString().split('T')[0];
                 if (data.date !== today) {
                     data.date = today;
@@ -265,7 +256,6 @@
             const input = document.getElementById('newItemCore');
             const value = input.value.trim();
             if (!value) return;
-            
             const id = Math.max(...data.coreItems.map(i => i.id), 0) + 1;
             data.coreItems.push({ id, name: value });
             input.value = '';
@@ -276,7 +266,6 @@
             const input = document.getElementById('newItemHabit');
             const value = input.value.trim();
             if (!value) return;
-            
             const id = Math.max(...data.habitItems.map(i => i.id), 0) + 1;
             data.habitItems.push({ id, name: value });
             input.value = '';
@@ -329,7 +318,6 @@
             document.getElementById('dateDisplay').textContent = today.toLocaleDateString('en-US', options);
             document.getElementById('streakDisplay').textContent = `Streak: ${calculateStreak()} days`;
             
-            // Core items
             let coreHtml = '';
             data.coreItems.forEach(item => {
                 const checked = data.coreCompleted.includes(item.id);
@@ -343,7 +331,6 @@
             });
             document.getElementById('coreItems').innerHTML = coreHtml;
             
-            // Habit items
             let habitHtml = '';
             data.habitItems.forEach(item => {
                 const checked = data.habitCompleted.includes(item.id);
@@ -357,7 +344,6 @@
             });
             document.getElementById('habitItems').innerHTML = habitHtml || '<div style="color: #555; font-size: 13px; padding: 10px 0;">Add habits to track</div>';
             
-            // Stats
             const total = data.coreItems.length + data.habitItems.length;
             const completed = data.coreCompleted.length + data.habitCompleted.length;
             document.getElementById('completed').textContent = completed;
